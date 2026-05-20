@@ -2,10 +2,10 @@
 
 ## Файлы
 
-- [fib.h](fib.h)
-- [fibonacci.c](fibonacci.c)
-- [fibonacci_paralel.c](fibonacci_paralel.c)
-- [main.c](main.c)
+- [fib.h](incl/fib.h)
+- [fibonacci.c](source/fibonacci.c)
+- [fibonacci_paralel.c](source/fibonacci_paralel.c)
+- [main.c](source/main.c)
 - [Makefile](Makefile)
 - [fibonacci_parallel.c](fibonacci_parallel.c)
 
