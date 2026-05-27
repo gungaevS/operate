@@ -16,7 +16,6 @@
 
 ## 2. Трансляция в ассемблер
 
-```bash
 gcc -S -O0 -o fibonacci_O0.s fibonacci.c
 gcc -S -O1 -o fibonacci_O1.s fibonacci.c
 gcc -S -O2 -o fibonacci_O2.s fibonacci.c
