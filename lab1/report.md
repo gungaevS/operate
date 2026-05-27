@@ -102,7 +102,7 @@ fib_project/
 - [fibonacci_paralel.c](source/fibonacci_paralel.c)
 - [main.c](source/main.c)
 - [Makefile](Makefile)
-- [fibonacci_parallel.c](fibonacci_parallel.c)
+
 
 ## Ассемблер
 
