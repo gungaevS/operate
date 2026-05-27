@@ -112,7 +112,9 @@ fib_project/
 - [fibonacci_O3.s](fibonacci_O3.s)
 
 ---
+## Видео
 
+Видео: [ссылка](https://drive.google.com/file/d/1e9VN-GEidZxO9LKPQeJsAUkcXbASPRo0/view?usp=sharing)
 ## Вывод
 
 Изучена работа GCC с флагами -O0, -O1, -O2, -O3. Проведён анализ ассемблерного кода: найдены циклы, переменные, условные переходы. Реализован swap (xchg). Разработана модульная структура и Makefile. Освоены fork(), pipe, git и GitHub.
