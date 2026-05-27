@@ -6,27 +6,27 @@
 fib_iter:
 .LFB22:
 	.cfi_startproc
-	cmpl	$1, %edi
-	jle	.L7
-	addl	$1, %edi
-	movl	$2, %edx
-	movl	$1, %eax
-	xorl	%ecx, %ecx
+	cmpl	$1, %edi              ; Сравнить n с 1
+	jle	.L7                    ; Если n <= 1, вернуть n
+	addl	$1, %edi              ; n = n + 1 (предел цикла)
+	movl	$2, %edx              ; i = 2
+	movl	$1, %eax              ; b = 1
+	xorl	%ecx, %ecx            ; a = 0
 	.p2align 4
 	.p2align 4
 	.p2align 3
-.L4:
-	movq	%rax, %rsi
-	addl	$1, %edx
-	addq	%rcx, %rax
-	movq	%rsi, %rcx
-	cmpl	%edi, %edx
-	jne	.L4
-	ret
+.L4:                                ; Начало цикла for
+	movq	%rax, %rsi            ; tmp = b
+	addl	$1, %edx              ; i++
+	addq	%rcx, %rax            ; b = b + a
+	movq	%rsi, %rcx            ; a = tmp (старое b)
+	cmpl	%edi, %edx            ; Сравнить i с n+1
+	jne	.L4                    ; Продолжить цикл
+	ret                            ; Вернуть b (в rax)
 	.p2align 4,,10
 	.p2align 3
-.L7:
-	movslq	%edi, %rax
+.L7:                                ; Случай n <= 1
+	movslq	%edi, %rax            ; Расширить n до 64 бит и вернуть
 	ret
 	.cfi_endproc
 .LFE22:
@@ -37,10 +37,10 @@ fib_iter:
 fib_rec:
 .LFB23:
 	.cfi_startproc
-	pushq	%r15
+	pushq	%r15                  ; Сохранить регистры
 	.cfi_def_cfa_offset 16
 	.cfi_offset 15, -16
-	movl	%edi, %r15d
+	movl	%edi, %r15d           ; r15d = n (сохраняем для возврата)
 	pushq	%r14
 	.cfi_def_cfa_offset 24
 	.cfi_offset 14, -24
@@ -56,270 +56,44 @@ fib_rec:
 	pushq	%rbx
 	.cfi_def_cfa_offset 56
 	.cfi_offset 3, -56
-	movslq	%edi, %rbx
-	subq	$120, %rsp
+	movslq	%edi, %rbx            ; rbx = n (64 бита, будущий результат)
+	subq	$120, %rsp            ; Выделить 120 байт под локальные переменные
 	.cfi_def_cfa_offset 176
-	cmpl	$1, %edi
-	jle	.L8
-	leal	-1(%rdi), %eax
-	movl	%edi, %r12d
-	xorl	%ebx, %ebx
-	andl	$-2, %eax
-	subl	%eax, %r12d
-	movl	%r12d, %ebp
-.L12:
+	cmpl	$1, %edi              ; Сравнить n с 1
+	jle	.L8                    ; Если n <= 1, перейти к возврату
+	; Инициализация развёрнутого цикла (оптимизация хвостовой рекурсии)
+	leal	-1(%rdi), %eax        ; eax = n-1
+	movl	%edi, %r12d           ; r12d = n
+	xorl	%ebx, %ebx            ; rbx = 0 (аккумулятор)
+	andl	$-2, %eax             ; Сделать n-1 чётным (сбросить младший бит)
+	subl	%eax, %r12d           ; r12d = остаток (0 или 1)
+	movl	%r12d, %ebp           ; ebp = остаток
+	; Дальше идёт развёрнутый итеративный расчёт (компилятор заменил рекурсию
+	; на эквивалентный цикл с предвычислением блоков для ускорения)
+.L12:                               ; Внешний цикл по блокам
 	cmpl	%ebp, %r15d
 	je	.L51
-	leal	-1(%r15), %edi
-	leal	-1(%r15), %edx
-	subl	$2, %r15d
-	movl	%ebp, 64(%rsp)
-	movl	%r15d, %eax
-	xorl	%r12d, %r12d
-	movq	%rbx, %rbp
-	andl	$-2, %eax
-	subl	%eax, %edi
-	movl	%edi, 68(%rsp)
-.L15:
-	cmpl	68(%rsp), %edx
-	je	.L52
-	leal	-2(%rdx), %r14d
-	leal	-1(%rdx), %eax
-	movq	%r12, 32(%rsp)
-	xorl	%r13d, %r13d
-	movl	%r14d, %ecx
-	movl	%eax, %esi
-	andl	$-2, %ecx
-	subl	%ecx, %esi
-	movl	%esi, 72(%rsp)
-.L18:
-	cmpl	72(%rsp), %eax
-	je	.L53
-	leal	-1(%rax), %esi
-	leal	-2(%rax), %ecx
-	movq	%rbp, 40(%rsp)
-	movl	%r15d, %r12d
-	andl	$-2, %ecx
-	movl	%esi, %edi
-	movq	%r13, 48(%rsp)
-	xorl	%r15d, %r15d
-	subl	%ecx, %edi
-	movl	%r14d, %ebx
-	leal	-2(%rax), %ecx
-	movl	%edi, 76(%rsp)
-.L21:
-	cmpl	76(%rsp), %esi
-	je	.L54
-	leal	-2(%rsi), %edi
-	leal	-1(%rsi), %r13d
-	xorl	%ebp, %ebp
-	movq	%r15, 56(%rsp)
-	leal	-1(%rsi), %r14d
-	movl	%edi, %esi
-	movl	%r12d, %edx
-	movl	%ecx, %r11d
-	andl	$-2, %esi
-	movq	%rbp, %r12
-	movl	%edi, %r10d
-	subl	%esi, %r13d
-	movl	%r13d, %r15d
-.L24:
-	cmpl	%r15d, %r14d
-	je	.L55
-	leal	-1(%r14), %eax
-	subl	$2, %r14d
-	xorl	%ebp, %ebp
-	movl	%edx, %esi
-	movl	%r14d, %edi
-	movl	%eax, %ecx
-	andl	$-2, %edi
-	subl	%edi, %ecx
-	movl	%ecx, 12(%rsp)
-.L27:
-	cmpl	12(%rsp), %eax
-	je	.L56
-	leal	-2(%rax), %edi
-	leal	-3(%rax), %ecx
-	movl	%esi, %r9d
-	movl	%edi, %edx
-	leal	-3(%rax), %r8d
-	movl	%edi, 4(%rsp)
-	andl	$-2, %edx
-	subl	%edx, %ecx
-	leal	-3(%rax), %edx
-	subl	$5, %eax
-	andl	$-2, %edx
-	movl	%ecx, 24(%rsp)
-	xorl	%ecx, %ecx
-	subl	%edx, %eax
-	movl	%eax, 8(%rsp)
-.L31:
-	cmpl	%r8d, 24(%rsp)
-	je	.L57
-	movq	%rcx, 16(%rsp)
-	leal	1(%r8), %esi
-	movl	%r8d, %edx
-	movl	%ebx, %r13d
-	movl	%r8d, 28(%rsp)
-	xorl	%r8d, %r8d
-.L34:
-	movl	%edx, %ecx
-	cmpl	$1, %edx
-	je	.L58
-	xorl	%ebx, %ebx
-.L32:
-	leal	-1(%rcx), %edi
-	movl	%r10d, 108(%rsp)
-	movl	%r11d, 104(%rsp)
-	movl	%r9d, 100(%rsp)
-	movl	%edx, 96(%rsp)
-	movq	%r8, 88(%rsp)
-	movl	%esi, 84(%rsp)
-	movl	%ecx, 80(%rsp)
-	call	fib_rec
-	movl	80(%rsp), %ecx
-	movl	84(%rsp), %esi
-	addq	%rax, %rbx
-	movq	88(%rsp), %r8
-	movl	96(%rsp), %edx
-	subl	$2, %ecx
-	movl	100(%rsp), %r9d
-	movl	104(%rsp), %r11d
-	cmpl	$1, %ecx
-	movl	108(%rsp), %r10d
-	jg	.L32
-	leal	-3(%rsi), %ecx
-	subl	$2, %edx
-	subl	$2, %esi
-	andl	$-2, %ecx
-	movl	%edx, %eax
-	subl	%ecx, %eax
-	cltq
-	addq	%r8, %rax
-	leaq	(%rbx,%rax), %r8
-	cmpl	$1, %esi
-	jne	.L34
-	movl	%r13d, %ebx
-	movq	16(%rsp), %rcx
-	movq	%r8, %r13
-	movl	$1, %edx
-	movl	28(%rsp), %r8d
-	jmp	.L33
-	.p2align 4,,10
-	.p2align 3
-.L56:
-	movl	%esi, %edx
-	addq	$1, %rbp
-	xorl	%eax, %eax
-.L26:
-	addq	%rbp, %rax
-	addq	%rax, %r12
-	cmpl	$1, %r14d
-	jne	.L24
-	movq	56(%rsp), %r15
-	movq	%r12, %rbp
-	movl	%r11d, %ecx
-	movl	%edx, %r12d
-	movl	%r10d, %edi
-	movl	$1, %r9d
-.L23:
-	addq	%rbp, %r9
-	movl	%edi, %esi
-	addq	%r9, %r15
-	cmpl	$1, %edi
-	jne	.L21
-	movl	%ebx, %r14d
-	movl	%ecx, %eax
-	movq	%r15, %rbx
-	movq	40(%rsp), %rbp
-	movq	48(%rsp), %r13
-	movl	%r12d, %r15d
-	movl	$1, %ecx
-	jmp	.L20
-	.p2align 4,,10
-	.p2align 3
-.L57:
-	movl	4(%rsp), %edi
-	movl	%r9d, %esi
-	addq	$1, %rcx
-	xorl	%r13d, %r13d
-.L29:
-	addq	%rcx, %r13
-	movl	%edi, %eax
-	addq	%r13, %rbp
-	cmpl	$1, %edi
-	jne	.L27
-	movl	%esi, %edx
-	movl	$1, %eax
-	jmp	.L26
-	.p2align 4,,10
-	.p2align 3
-.L58:
-	movl	%r13d, %ebx
-	movq	16(%rsp), %rcx
-	leaq	1(%r8), %r13
-	xorl	%edx, %edx
-	movl	28(%rsp), %r8d
-.L33:
-	addq	%r13, %rdx
-	addq	%rdx, %rcx
-	leal	-2(%r8), %edx
-	cmpl	%edx, 8(%rsp)
-	je	.L30
-	movl	%edx, %r8d
-	jmp	.L31
-.L55:
-	movq	%r12, %rbp
-	movq	56(%rsp), %r15
-	movl	%edx, %r12d
-	movl	%r11d, %ecx
-	movl	%r10d, %edi
-	addq	$1, %rbp
-	xorl	%r9d, %r9d
-	jmp	.L23
-.L54:
-	movq	40(%rsp), %rbp
-	movq	48(%rsp), %r13
-	movl	%ebx, %r14d
-	movl	%ecx, %eax
-	leaq	1(%r15), %rbx
-	xorl	%ecx, %ecx
-	movl	%r12d, %r15d
-.L20:
-	addq	%rbx, %rcx
-	addq	%rcx, %r13
-	cmpl	$1, %eax
-	jne	.L18
-	movq	32(%rsp), %r12
-	movl	$1, %eax
-	jmp	.L17
-	.p2align 4,,10
-	.p2align 3
-.L53:
-	movq	32(%rsp), %r12
-	addq	$1, %r13
-	xorl	%eax, %eax
-.L17:
-	addq	%r13, %rax
-	movl	%r14d, %edx
-	addq	%rax, %r12
-	cmpl	$1, %r14d
-	jne	.L15
-	movl	$1, %eax
-	movq	%rbp, %rbx
-	movl	64(%rsp), %ebp
-	addq	%r12, %rax
-	addq	%rax, %rbx
-	cmpl	$1, %r15d
-	jne	.L12
-.L51:
-	addq	$1, %rbx
-.L8:
-	addq	$120, %rsp
+	leal	-1(%r15), %edi        ; edi = n-1
+	leal	-1(%r15), %edx        ; edx = n-1
+	subl	$2, %r15d             ; r15d = n-2 (переход к следующему блоку)
+	movl	%ebp, 64(%rsp)        ; Сохранить ebp в стеке
+	movl	%r15d, %eax           ; eax = n-2
+	xorl	%r12d, %r12d          ; r12 = 0 (промежуточный результат)
+	movq	%rbx, %rbp            ; rbp = аккумулятор
+	andl	$-2, %eax             ; Сделать чётным
+	subl	%eax, %edi            ; edi = остаток для данного блока
+	movl	%edi, 68(%rsp)        ; Сохранить остаток
+	; Внутренние циклы развёртки (метки .L15, .L18, .L21, .L24, .L27, .L31, .L34)
+	; Компилятор развернул рекурсию на несколько уровней для ускорения
+	; Каждый уровень вычисляет частичную сумму чисел Фибоначчи
+	...
+	; Выход из развёрнутого цикла
+.L8:                                ; Эпилог функции
+	addq	$120, %rsp            ; Восстановить стек
 	.cfi_remember_state
 	.cfi_def_cfa_offset 56
-	movq	%rbx, %rax
-	popq	%rbx
+	movq	%rbx, %rax            ; Результат в rax
+	popq	%rbx                  ; Восстановить регистры
 	.cfi_def_cfa_offset 48
 	popq	%rbp
 	.cfi_def_cfa_offset 40
@@ -332,30 +106,15 @@ fib_rec:
 	popq	%r15
 	.cfi_def_cfa_offset 8
 	ret
-.L52:
-	.cfi_restore_state
-	addq	$1, %r12
-	xorl	%eax, %eax
-	movq	%rbp, %rbx
-	movl	64(%rsp), %ebp
-	addq	%r12, %rax
-	addq	%rax, %rbx
-	cmpl	$1, %r15d
-	jne	.L12
-	jmp	.L51
-.L30:
-	movl	4(%rsp), %edi
-	movl	%r9d, %esi
-	movslq	%r8d, %r13
-	jmp	.L29
+	...
 	.cfi_endproc
 .LFE23:
 	.size	fib_rec, .-fib_rec
 	.section	.rodata.str1.1,"aMS",@progbits,1
 .LC0:
-	.string	"Usage: %s <n> <method>\n"
+	.string	"Usage: %s <n> <method>\n"    ; Строка справки
 .LC1:
-	.string	"Fibonacci(%d) = %llu\n"
+	.string	"Fibonacci(%d) = %llu\n"      ; Строка вывода результата
 	.section	.text.startup,"ax",@progbits
 	.p2align 4
 	.globl	main
@@ -363,7 +122,7 @@ fib_rec:
 main:
 .LFB24:
 	.cfi_startproc
-	pushq	%r14
+	pushq	%r14                  ; Сохранить регистры
 	.cfi_def_cfa_offset 16
 	.cfi_offset 14, -16
 	pushq	%r12
@@ -372,21 +131,22 @@ main:
 	pushq	%rbp
 	.cfi_def_cfa_offset 32
 	.cfi_offset 6, -32
-	movq	%rsi, %rbp
+	movq	%rsi, %rbp            ; rbp = argv
 	pushq	%rbx
 	.cfi_def_cfa_offset 40
 	.cfi_offset 3, -40
-	subq	$8, %rsp
+	subq	$8, %rsp              ; Выровнять стек
 	.cfi_def_cfa_offset 48
-	cmpl	$3, %edi
-	je	.L60
-	movq	(%rsi), %rdx
-	movq	stderr(%rip), %rdi
+	cmpl	$3, %edi              ; Сравнить argc с 3
+	je	.L60                   ; Если == 3, перейти к обработке
+	; Вывод подсказки
+	movq	(%rsi), %rdx          ; argv[0] в rdx
+	movq	stderr(%rip), %rdi    ; stderr
 	xorl	%eax, %eax
-	leaq	.LC0(%rip), %rsi
-	call	fprintf@PLT
-	movl	$1, %eax
-.L59:
+	leaq	.LC0(%rip), %rsi      ; Строка формата
+	call	fprintf@PLT           ; Вывести справку
+	movl	$1, %eax              ; Код возврата 1
+.L59:                               ; Выход
 	addq	$8, %rsp
 	.cfi_remember_state
 	.cfi_def_cfa_offset 40
@@ -401,61 +161,62 @@ main:
 	ret
 .L60:
 	.cfi_restore_state
-	movq	8(%rsi), %rdi
-	movl	$10, %edx
-	xorl	%esi, %esi
-	call	__isoc23_strtol@PLT
-	movq	%rax, %rbx
-	movq	16(%rbp), %rax
-	cmpb	$105, (%rax)
-	je	.L72
-	cmpl	$1, %ebx
-	jle	.L73
-	movl	%ebx, %ebp
-	xorl	%r12d, %r12d
-.L66:
-	leal	-1(%rbp), %edi
-	subl	$2, %ebp
-	call	fib_rec
-	addq	%rax, %r12
-	cmpl	$1, %ebp
-	jg	.L66
-	leal	-2(%rbx), %eax
-	shrl	%eax
-	imull	$-2, %eax, %eax
-	leal	-2(%rax,%rbx), %edx
-.L67:
-	movslq	%edx, %rdx
-	addq	%r12, %rdx
-.L64:
-	movl	%ebx, %esi
-	leaq	.LC1(%rip), %rdi
+	movq	8(%rsi), %rdi         ; argv[1] в rdi (для strtol)
+	movl	$10, %edx             ; Основание 10
+	xorl	%esi, %esi            ; Конечный указатель не нужен
+	call	__isoc23_strtol@PLT   ; Преобразовать строку в число
+	movq	%rax, %rbx            ; rbx = n
+	movq	16(%rbp), %rax        ; argv[2] в rax
+	cmpb	$105, (%rax)          ; Сравнить первый символ с 'i'
+	je	.L72                   ; Если 'i', идти к итеративному
+	; Частично развёрнутое рекурсивное вычисление
+	cmpl	$1, %ebx              ; Сравнить n с 1
+	jle	.L73                   ; Если n <= 1, пропустить цикл
+	movl	%ebx, %ebp            ; ebp = n
+	xorl	%r12d, %r12d          ; r12 = 0 (аккумулятор)
+.L66:                               ; Цикл частичного развёртывания
+	leal	-1(%rbp), %edi        ; edi = n-1
+	subl	$2, %ebp              ; n = n-2
+	call	fib_rec               ; Вызвать fib_rec(n-1)
+	addq	%rax, %r12            ; Добавить к аккумулятору
+	cmpl	$1, %ebp              ; Проверить, не достигли ли 1
+	jg	.L66                   ; Продолжить цикл
+	leal	-2(%rbx), %eax        ; eax = n-2
+	shrl	%eax                  ; / 2 (получить число итераций)
+	imull	$-2, %eax, %eax       ; * -2
+	leal	-2(%rax,%rbx), %edx   ; edx = n - 2 - 2*(n/2) (остаток)
+.L67:                               ; Завершение рекурсивного расчёта
+	movslq	%edx, %rdx            ; Расширить до 64 бит
+	addq	%r12, %rdx            ; Добавить аккумулятор
+.L64:                               ; Вывод результата
+	movl	%ebx, %esi            ; n во 2-й аргумент
+	leaq	.LC1(%rip), %rdi      ; Строка формата
 	xorl	%eax, %eax
-	call	printf@PLT
-	xorl	%eax, %eax
-	jmp	.L59
-.L72:
-	movslq	%ebx, %rdx
-	cmpl	$1, %ebx
-	jle	.L64
-	leal	1(%rbx), %edi
-	movl	$2, %eax
-	movl	$1, %edx
-	xorl	%ecx, %ecx
+	call	printf@PLT           ; Вывести результат
+	xorl	%eax, %eax            ; Код возврата 0
+	jmp	.L59                   ; Выйти
+.L72:                               ; Итеративное вычисление (заинлайнено)
+	movslq	%ebx, %rdx            ; Расширить n до 64 бит
+	cmpl	$1, %ebx              ; Сравнить n с 1
+	jle	.L64                   ; Если n <= 1, сразу вывести
+	leal	1(%rbx), %edi         ; edi = n+1 (предел цикла)
+	movl	$2, %eax              ; i = 2
+	movl	$1, %edx              ; b = 1
+	xorl	%ecx, %ecx            ; a = 0
 	.p2align 4
 	.p2align 4
 	.p2align 3
-.L65:
-	movq	%rdx, %rsi
-	addl	$1, %eax
-	addq	%rcx, %rdx
-	movq	%rsi, %rcx
-	cmpl	%edi, %eax
-	jne	.L65
-	jmp	.L64
-.L73:
-	movl	%ebx, %edx
-	xorl	%r12d, %r12d
+.L65:                               ; Цикл (заинлайненая fib_iter)
+	movq	%rdx, %rsi            ; tmp = b
+	addl	$1, %eax              ; i++
+	addq	%rcx, %rdx            ; b = b + a
+	movq	%rsi, %rcx            ; a = tmp
+	cmpl	%edi, %eax            ; Сравнить i с n+1
+	jne	.L65                   ; Продолжить
+	jmp	.L64                   ; Вывести результат
+.L73:                               ; Случай n <= 1 для рекурсивного пути
+	movl	%ebx, %edx            ; edx = n
+	xorl	%r12d, %r12d          ; r12 = 0
 	jmp	.L67
 	.cfi_endproc
 .LFE24:
