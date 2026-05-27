@@ -79,29 +79,21 @@ fork() — создание дочернего процесса
 6. Git и GitHub
 Локальный репозиторий, .gitignore
 
-Серия коммитов
+## Файлы
 
-Загружено на GitHub: github.com/gungaavs/opera
+- [fib.h](incl/fib.h)
+- [fibonacci.c](source/fibonacci.c)
+- [fibonacci_paralel.c](source/fibonacci_paralel.c)
+- [main.c](source/main.c)
+- [Makefile](Makefile)
+- [fibonacci_parallel.c](fibonacci_parallel.c)
 
-📁 Файлы
-fib.h
+## Ассемблер
 
-fibonacci.c
-
-fibonacci_parallel.c
-
-main.c
-
-Makefile
-
-⚙️ Ассемблер
-fibonacci_O0.s
-
-fibonacci_O1.s
-
-fibonacci_O2.s
-
-fibonacci_O3.s
+- [fibonacci_O0.s](fibonacci_O0.s)
+- [fibonacci_O2.s](fibonacci_O1.s)
+- [fibonacci_O2.s](fibonacci_O2.s)
+- [fibonacci_O3.s](fibonacci_O3.s)
 
 Вывод
 Изучена работа GCC с флагами -O0 – -O3. Проведён анализ ассемблерного кода: найдены циклы, переменные, условные переходы. Реализован swap (xchg). Разработана модульная структура и Makefile. Освоены fork(), pipe, git и GitHub.
