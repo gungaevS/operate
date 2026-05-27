@@ -36,7 +36,7 @@
 Видео процесса установки:
 https://drive.google.com/file/d/1Lhh_z1iSewHZ3MO8aOITsAItjGpwTYQ2/view?usp=sharing
 
-Видео настройки swap:
+Видео swap:
 https://drive.google.com/file/d/1wEv7T2IBVN3xPzExXYRMdQWS4ploqkqf/view?usp=sharing
 ## Вывод
 Изучен процесс установки Linux через System Rescue CD
